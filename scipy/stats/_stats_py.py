@@ -5344,7 +5344,7 @@ def multiscale_graphcorr(x, y, compute_distance=_euclidean_dist, reps=1000,
         Requires that `func` be pickleable. The default is ``1``.
     is_twosamp : bool, optional
         If `True`, a two sample test will be run. If ``x`` and ``y`` have
-        shapes ``(n, p)`` and ``(m, p)``, this optional will be overriden and
+        shapes ``(n, p)`` and ``(m, p)``, this optional will be overridden and
         set to ``True``. Set to ``True`` if ``x`` and ``y`` both have shapes
         ``(n, p)`` and a two sample test is desired. The default is ``False``.
         Note that this will not run if inputs are distance matrices.
