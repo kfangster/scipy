@@ -7368,7 +7368,7 @@ class TestDcorrStat:
         x, y = self._simulations(samps=100, dims=1, sim_type="linear")
 
         # test stat and pvalue
-        stat, pvalue = stats.stats.distance_correlation(x, y, workers=2)
+        stat, pvalue = stats.distance_correlation(x, y, workers=2)
         assert_approx_equal(stat, 0.97, significant=1)
         assert_approx_equal(pvalue, 0.001, significant=1)
 
