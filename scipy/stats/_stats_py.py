@@ -5157,8 +5157,8 @@ class _ParallelP:
         return perm_stat
 
 
-def _perm_test(x, y, stat, reps=1000, workers=-1, random_state=None):
-    r"""Helper function that calculates the p-value. See below for uses.
+def _perm_test(x, y, stat, func, reps=1000, workers=-1, random_state=None):
+    """Helper function that calculates the p-value. See below for uses.
 
     Parameters
     ----------
@@ -5202,7 +5202,7 @@ def _perm_test(x, y, stat, reps=1000, workers=-1, random_state=None):
                      size=4, dtype=np.uint32)) for _ in range(reps)]
 
     # parallelizes with specified workers over number of reps and set seeds
-    parallelp = _ParallelP(x=x, y=y, random_states=random_states)
+    parallelp = _ParallelP(x=x, y=y, random_states=random_states,calc_stat=func)
     with MapWrapper(workers) as mapwrapper:
         null_dist = np.array(list(mapwrapper(parallelp, range(reps))))
 
