@@ -5134,19 +5134,25 @@ def weightedtau(x, y, rank=True, weigher=None, additive=True):
 
 
 class _ParallelP:
-    """Helper function to calculate parallel p-value."""
-
-    def __init__(self, x, y, random_states):
+    """
+    Helper function to calculate parallel p-value.
+    """
+    def __init__(self, x, y, random_states,calc_stat):
         self.x = x
         self.y = y
         self.random_states = random_states
+        self.calc_stat = calc_stat
 
     def __call__(self, index):
         order = self.random_states[index].permutation(self.y.shape[0])
         permy = self.y[order][:, order]
 
         # calculate permuted stats, store in null distribution
-        perm_stat = _mgc_stat(self.x, permy)[0]
+        if self.calc_stat == _mgc_stat:
+            perm_stat = self.calc_stat(self.x, permy)[0]
+        # adds a dcorr in here with the self.calc_stat
+        else:
+            perm_stat = self.calc_stat(self.x, permy)
 
         return perm_stat
 
