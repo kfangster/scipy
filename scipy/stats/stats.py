@@ -5046,25 +5046,31 @@ def weightedtau(x, y, rank=True, weigher=None, additive=True):
 
 
 class _ParallelP:
-    """Helper function to calculate parallel p-value."""
-
-    def __init__(self, x, y, random_states):
+    """
+    Helper function to calculate parallel p-value.
+    """
+    def __init__(self, x, y, random_states,calc_stat):
         self.x = x
         self.y = y
         self.random_states = random_states
+        self.calc_stat = calc_stat
 
     def __call__(self, index):
         order = self.random_states[index].permutation(self.y.shape[0])
         permy = self.y[order][:, order]
 
         # calculate permuted stats, store in null distribution
-        perm_stat = _mgc_stat(self.x, permy)[0]
+        if self.calc_stat == _mgc_stat:
+            perm_stat = self.calc_stat(self.x, permy)[0]
+        # adds a dcorr in here with the self.calc_stat
+        else:
+            perm_stat = self.calc_stat(self.x, permy)
 
         return perm_stat
 
 
-def _perm_test(x, y, stat, reps=1000, workers=-1, random_state=None):
-    r"""Helper function that calculates the p-value. See below for uses.
+def _perm_test(x, y, stat, func, reps=1000, workers=-1, random_state=None):
+    """Helper function that calculates the p-value. See below for uses.
 
     Parameters
     ----------
@@ -5108,7 +5114,7 @@ def _perm_test(x, y, stat, reps=1000, workers=-1, random_state=None):
                      size=4, dtype=np.uint32)) for _ in range(reps)]
 
     # parallelizes with specified workers over number of reps and set seeds
-    parallelp = _ParallelP(x=x, y=y, random_states=random_states)
+    parallelp = _ParallelP(x=x, y=y, random_states=random_states,calc_stat=func)
     with MapWrapper(workers) as mapwrapper:
         null_dist = np.array(list(mapwrapper(parallelp, range(reps))))
 
