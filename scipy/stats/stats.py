@@ -5135,6 +5135,74 @@ def _euclidean_dist(x):
 
 MGCResult = namedtuple('MGCResult', ('stat', 'pvalue', 'mgc_dict'))
 
+def _check_inputs(x,y, compute_distance=_euclidean_dist, reps=1000,
+                         workers=1, is_twosamp=False, random_state=None):
+    if not isinstance(x, np.ndarray) or not isinstance(y, np.ndarray):
+        raise ValueError("x and y must be ndarrays")
+
+    # convert arrays of type (n,) to (n, 1)
+    if x.ndim == 1:
+        x = x[:, np.newaxis]
+    elif x.ndim != 2:
+        raise ValueError("Expected a 2-D array `x`, found shape "
+                         "{}".format(x.shape))
+    if y.ndim == 1:
+        y = y[:, np.newaxis]
+    elif y.ndim != 2:
+        raise ValueError("Expected a 2-D array `y`, found shape "
+                         "{}".format(y.shape))
+
+    nx, px = x.shape
+    ny, py = y.shape
+
+    # check for NaNs
+    _contains_nan(x, nan_policy='raise')
+    _contains_nan(y, nan_policy='raise')
+
+    # check for positive or negative infinity and raise error
+    if np.sum(np.isinf(x)) > 0 or np.sum(np.isinf(y)) > 0:
+        raise ValueError("Inputs contain infinities")
+
+    if nx != ny:
+        if px == py:
+            # reshape x and y for two sample testing
+            is_twosamp = True
+        else:
+            raise ValueError("Shape mismatch, x and y must have shape [n, p] "
+                             "and [n, q] or have shape [n, p] and [m, p].")
+
+    if nx < 5 or ny < 5:
+        raise ValueError("MGC requires at least 5 samples to give reasonable "
+                         "results.")
+
+    # convert x and y to float
+    x = x.astype(np.float64)
+    y = y.astype(np.float64)
+
+        # check if compute_distance_matrix if a callable()
+    if not callable(compute_distance) and compute_distance is not None:
+        raise ValueError("Compute_distance must be a function.")
+
+    # check if number of reps exists, integer, or > 0 (if under 1000 raises
+    # warning)
+    if not isinstance(reps, int) or reps < 0:
+        raise ValueError("Number of reps must be an integer greater than 0.")
+    elif reps < 1000:
+        msg = ("The number of replications is low (under 1000), and p-value "
+               "calculations may be unreliable. Use the p-value result, with "
+               "caution!")
+        warnings.warn(msg, RuntimeWarning)
+
+    if is_twosamp:
+        if compute_distance is None:
+            raise ValueError("Cannot run if inputs are distance matrices")
+        x, y = _two_sample_transform(x, y)
+
+    if compute_distance is not None:
+        # compute distance matrices for x and y
+        x = compute_distance(x)
+        y = compute_distance(y)
+    return x, y
 
 def multiscale_graphcorr(x, y, compute_distance=_euclidean_dist, reps=1000,
                          workers=1, is_twosamp=False, random_state=None):
@@ -5340,71 +5408,8 @@ def multiscale_graphcorr(x, y, compute_distance=_euclidean_dist, reps=1000,
     '-0.008, 1.0'
 
     """
-    if not isinstance(x, np.ndarray) or not isinstance(y, np.ndarray):
-        raise ValueError("x and y must be ndarrays")
-
-    # convert arrays of type (n,) to (n, 1)
-    if x.ndim == 1:
-        x = x[:, np.newaxis]
-    elif x.ndim != 2:
-        raise ValueError("Expected a 2-D array `x`, found shape "
-                         "{}".format(x.shape))
-    if y.ndim == 1:
-        y = y[:, np.newaxis]
-    elif y.ndim != 2:
-        raise ValueError("Expected a 2-D array `y`, found shape "
-                         "{}".format(y.shape))
-
-    nx, px = x.shape
-    ny, py = y.shape
-
-    # check for NaNs
-    _contains_nan(x, nan_policy='raise')
-    _contains_nan(y, nan_policy='raise')
-
-    # check for positive or negative infinity and raise error
-    if np.sum(np.isinf(x)) > 0 or np.sum(np.isinf(y)) > 0:
-        raise ValueError("Inputs contain infinities")
-
-    if nx != ny:
-        if px == py:
-            # reshape x and y for two sample testing
-            is_twosamp = True
-        else:
-            raise ValueError("Shape mismatch, x and y must have shape [n, p] "
-                             "and [n, q] or have shape [n, p] and [m, p].")
-
-    if nx < 5 or ny < 5:
-        raise ValueError("MGC requires at least 5 samples to give reasonable "
-                         "results.")
-
-    # convert x and y to float
-    x = x.astype(np.float64)
-    y = y.astype(np.float64)
-
-    # check if compute_distance_matrix if a callable()
-    if not callable(compute_distance) and compute_distance is not None:
-        raise ValueError("Compute_distance must be a function.")
-
-    # check if number of reps exists, integer, or > 0 (if under 1000 raises
-    # warning)
-    if not isinstance(reps, int) or reps < 0:
-        raise ValueError("Number of reps must be an integer greater than 0.")
-    elif reps < 1000:
-        msg = ("The number of replications is low (under 1000), and p-value "
-               "calculations may be unreliable. Use the p-value result, with "
-               "caution!")
-        warnings.warn(msg, RuntimeWarning)
-
-    if is_twosamp:
-        if compute_distance is None:
-            raise ValueError("Cannot run if inputs are distance matrices")
-        x, y = _two_sample_transform(x, y)
-
-    if compute_distance is not None:
-        # compute distance matrices for x and y
-        x = compute_distance(x)
-        y = compute_distance(y)
+    x, y = _check_inputs(x,y, compute_distance=compute_distance, reps=reps,
+                         workers=workers, is_twosamp=is_twosamp, random_state=random_state)
 
     # calculate MGC stat
     stat, stat_dict = _mgc_stat(x, y)
@@ -5412,7 +5417,7 @@ def multiscale_graphcorr(x, y, compute_distance=_euclidean_dist, reps=1000,
     opt_scale = stat_dict["opt_scale"]
 
     # calculate permutation MGC p-value
-    pvalue, null_dist = _perm_test(x, y, stat, reps=reps, workers=workers,
+    pvalue, null_dist = _perm_test(x, y, stat, func=_mgc_stat, reps=reps, workers=workers,
                                    random_state=random_state)
 
     # save all stats (other than stat/p-value) in dictionary
