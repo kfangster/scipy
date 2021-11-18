@@ -419,7 +419,6 @@ def _center_distmat(distx, bias):  # pragma: no cover
     return cent_distx
 """
 
-
 # Centers each distance matrix and rank matrix
 @cython.wraparound(False)
 @cython.boundscheck(False)
@@ -435,6 +434,27 @@ def _transform_distance_matrix(distx, disty, global_corr='mgc', is_ranked=True):
 
     return transform_dist
 
+@cython.wraparound(False)
+@cython.boundscheck(False)
+def _dcov(distx, disty, bias=False, only_dcov=True):  # pragma: no cover
+    """
+    Calculate the Dcov test statistic
+    """
+    if only_dcov:
+        # center distance matrices
+        distx,__ = _center_distance_matrix(distx, global_corr='dcorr', is_ranked=False, bias=bias)
+        disty,__ = _center_distance_matrix(disty, global_corr='dcorr', is_ranked=False, bias=bias)
+
+    stat = np.sum(distx * disty)
+
+    if only_dcov:
+        N = distx.shape[0]
+        if bias:
+            stat = 1 / (N ** 2) * stat
+        else:
+            stat = 1 / (N * (N - 3)) * stat
+
+    return stat
 
 # MGC specific functions
 @cython.wraparound(False)
