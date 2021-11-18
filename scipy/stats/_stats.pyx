@@ -324,9 +324,10 @@ def _rank_distance_matrix(distx):
     return np.hstack([_dense_rank_data(distx[:, i]).reshape(-1, 1) for i in range(distx.shape[0])])
 
 
+#need to cythonize _center_distance_matrix, maybe splitting it up like below then cythonizing better?
 @cython.wraparound(False)
 @cython.boundscheck(False)
-def _center_distance_matrix(distx, global_corr='mgc', is_ranked=True):
+def _center_distance_matrix(distx, global_corr='mgc', is_ranked=True, bias=False):
     cdef int n = distx.shape[0]
     cdef int m = distx.shape[1]
     cdef ndarray rank_distx = np.zeros(n * m)
@@ -337,11 +338,31 @@ def _center_distance_matrix(distx, global_corr='mgc', is_ranked=True):
     if global_corr == "rank":
         distx = rank_distx.astype(np.float64, copy=False)
 
-    # 'mgc' distance transform (col-wise mean) - default
-    cdef ndarray exp_distx = np.repeat(((distx.mean(axis=0) * n) / (n-1)), n).reshape(-1, n).T
+    if global_corr == "mgc":
+        # 'mgc' distance transform (col-wise mean) - default
+        exp_distx = np.repeat(((distx.mean(axis=0) * n) / (n-1)), n).reshape(-1, n).T
+    
+    elif global_corr == "dcorr":
+        if bias:
+            # use sum instead of mean because of numba restrictions
+            exp_distx = (
+                np.repeat(distx.sum(axis=0) / n, n).reshape(-1, n).T
+                + np.repeat(distx.sum(axis=1) / n, n).reshape(-1, n)
+                - (distx.sum() / (n * n))
+        )
+        else:
+            exp_distx = (
+                np.repeat((distx.sum(axis=0) / (n - 2)), n).reshape(-1, n).T
+                + np.repeat((distx.sum(axis=1) / (n - 2)), n).reshape(-1, n)
+                - distx.sum() / ((n - 1) * (n - 2))
+            )
 
     # center the distance matrix
     cdef ndarray cent_distx = distx - exp_distx
+
+    if global_corr == "dcorr" and not bias:
+        np.fill_diagonal(cent_distx, 0)
+
 
     if global_corr != "mantel" and global_corr != "biased":
         np.fill_diagonal(cent_distx, 0)
