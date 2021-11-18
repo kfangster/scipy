@@ -456,6 +456,40 @@ def _dcov(distx, disty, bias=False, only_dcov=True):  # pragma: no cover
 
     return stat
 
+@cython.wraparound(False)
+@cython.boundscheck(False)
+def _dcorr(distx, disty, bias=False):  # pragma: no cover
+    """
+    Calculate the Dcorr test statistic.
+    """
+ 
+    val = ""
+    if bias:
+        val = "biased"
+    else:
+        val = "unbiased"
+
+    # center distance matrices
+        
+
+    distx, __ = _center_distance_matrix(distx, global_corr='dcorr', is_ranked=False, bias=bias)
+    disty, __ = _center_distance_matrix(disty, global_corr='dcorr', is_ranked=False, bias=bias)
+
+    # calculate covariances and variances
+    covar = _dcov(distx, disty, bias=bias, only_dcov=False)
+    varx = _dcov(distx, distx, bias=bias, only_dcov=False)
+    vary = _dcov(disty, disty, bias=bias, only_dcov=False)
+
+    # stat is 0 with negative variances (would make denominator undefined)
+    if varx <= 0 or vary <= 0:
+        stat = 0
+
+    # calculate generalized test statistic
+    else:
+        stat = covar / np.real(np.sqrt(varx * vary))
+
+    return stat
+
 # MGC specific functions
 @cython.wraparound(False)
 @cython.boundscheck(False)
