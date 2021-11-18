@@ -46,6 +46,7 @@ from ._stats_mstats_common import (_find_repeats, linregress, theilslopes,
                                    siegelslopes)
 from ._stats import (_kendall_dis, _toint64, _weightedrankedtau,
                      _local_correlations)
+from ._stats import (_dcorr)
 from dataclasses import make_dataclass
 from ._hypotests import _all_partitions
 from ._hypotests_pythran import _compute_outer_prob_inside_method
@@ -68,7 +69,7 @@ __all__ = ['find_repeats', 'gmean', 'hmean', 'mode', 'tmean', 'tvar',
            'PearsonRConstantInputWarning', 'PearsonRNearConstantInputWarning',
            'pearsonr', 'fisher_exact',
            'SpearmanRConstantInputWarning', 'spearmanr', 'pointbiserialr',
-           'kendalltau', 'weightedtau', 'multiscale_graphcorr',
+           'kendalltau', 'weightedtau', 'multiscale_graphcorr', 'distance_correlation',
            'linregress', 'siegelslopes', 'theilslopes', 'ttest_1samp',
            'ttest_ind', 'ttest_ind_from_stats', 'ttest_rel',
            'kstest', 'ks_1samp', 'ks_2samp',
