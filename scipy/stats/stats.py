@@ -5475,6 +5475,159 @@ def _mgc_stat(distx, disty):
 
     return stat, stat_dict
 
+def distance_correlation(x, y, compute_distance=_euclidean_dist, reps=1000,
+                         workers=1, is_twosamp=False, random_state=None):
+    
+    """Dcorr is a measure of dependence between two paired random matrices of not 
+    necessarily equal dimensions. The coefficient is 0 if and only if the matrices 
+    are independent. It is an example of an energy distance.
+
+    Parameters
+    ----------
+    x, y : ndarray
+        If ``x`` and ``y`` have shapes ``(n, p)`` and ``(n, q)`` where `n` is
+        the number of samples and `p` and `q` are the number of dimensions,
+        then the MGC independence test will be run.  Alternatively, ``x`` and
+        ``y`` can have shapes ``(n, n)`` if they are distance or similarity
+        matrices, and ``compute_distance`` must be sent to ``None``. If ``x``
+        and ``y`` have shapes ``(n, p)`` and ``(m, p)``, an unpaired
+        two-sample MGC test will be run.
+    compute_distance : callable, optional
+        A function that computes the distance or similarity among the samples
+        within each data matrix. Set to ``None`` if ``x`` and ``y`` are
+        already distance matrices. The default uses the euclidean norm metric.
+        If you are calling a custom function, either create the distance
+        matrix before-hand or create a function of the form
+        ``compute_distance(x)`` where `x` is the data matrix for which
+        pairwise distances are calculated.
+    reps : int, optional
+        The number of replications used to estimate the null when using the
+        permutation test. The default is ``1000``.
+    workers : int or map-like callable, optional
+        If ``workers`` is an int the population is subdivided into ``workers``
+        sections and evaluated in parallel (uses ``multiprocessing.Pool
+        <multiprocessing>``). Supply ``-1`` to use all cores available to the
+        Process. Alternatively supply a map-like callable, such as
+        ``multiprocessing.Pool.map`` for evaluating the p-value in parallel.
+        This evaluation is carried out as ``workers(func, iterable)``.
+        Requires that `func` be pickleable. The default is ``1``.
+    is_twosamp : bool, optional
+        If `True`, a two sample test will be run. If ``x`` and ``y`` have
+        shapes ``(n, p)`` and ``(m, p)``, this optional will be overriden and
+        set to ``True``. Set to ``True`` if ``x`` and ``y`` both have shapes
+        ``(n, p)`` and a two sample test is desired. The default is ``False``.
+        Note that this will not run if inputs are distance matrices.
+    random_state : {None, int, `numpy.random.Generator`,
+                    `numpy.random.RandomState`}, optional
+
+        If `seed` is None (or `np.random`), the `numpy.random.RandomState`
+        singleton is used.
+        If `seed` is an int, a new ``RandomState`` instance is used,
+        seeded with `seed`.
+        If `seed` is already a ``Generator`` or ``RandomState`` instance then
+        that instance is used.
+
+    Returns
+    -------
+    stat : float
+        The sample Dcorr test statistic within `[-1, 1]`.
+    pvalue : float
+        The p-value obtained via permutation.
+
+    
+    Notes
+    -----
+
+    #. Let x and y be (n,p) samples of random variables X and Y. Let D^x be the n×n 
+       distance matrix of x and D^y be the n×n be the distance matrix of y. 
+       The distance covariance is
+    
+    .. math::
+
+    Dcovnb(x,y) = (1/(n^2)) \ times trace(D^{y} H D^{y} H)
+
+    #. where tr(⋅) is the trace operator and H is defined as H=I−(1/n)J where I 
+       is the identity matrix and J is a matrix of ones. The normalized version 
+       of this covariance is distance correlation 1 and is
+    
+    .. math::
+
+    Dcorrnb(x,y) = {Dcovnb(x,y)}/{\sqrt{Dcovnb(x,x) Dcovnb(y,y)}}
+
+    #. This is a biased test statistic. An unbiased alternative also exists, 
+       and is defined using the following: 
+
+    #. Consider the centering process where 1(⋅) is the indicator function:
+    
+    .. math::
+
+    Cij^x = [\(Dsb^x - (1/(n-2)) \sum_{t=1}^{n} Dit^x - (1/(n-2)) \sum_{s=1}^{n} Dsj^x 
+             + (1/(n-2)(n+2)) \sum_{s,t=1}^{n} Dst^x]1\sb{i≠j}
+    
+    #. and similarly for Cy. 
+
+    #. Then, this unbiased Dcorr is:
+    
+    .. math:: 
+    
+    Dcovn(x,y)=(1n/(n−3))tr(CxCy)
+
+    #. The normalized version of this covariance 2 is:
+
+    .. math::
+
+    Dcorrn(x,y)={Dcovn(x,y)}/{\sqrt{Dcovn(x,x) Dcovn(y,y)}}
+
+    #. The p-value returned is calculated using a permutation test using 
+       hyppo.tools.perm_test. The fast version of the test uses hyppo.tools.chi2_approx.
+
+    #. When the data is 1 dimension and the distance metric is Euclidean, 
+       and even faster version of the algorithm is run (computational complexity is O(nlogn))^3.
+    
+    References
+    ----------
+    .. [1] Gábor J. Székely, Maria L. Rizzo, and Nail K. Bakirov. 
+           Measuring and testing dependence by correlation of distances. 
+           The Annals of Statistics, 35(6):2769–2794, December 2007. 
+           doi:10.1214/009053607000000505.
+    .. [2] Gábor J. Székely and Maria L. Rizzo. Partial distance correlation 
+           with methods for dissimilarities. The Annals of Statistics, 42(6):2382–2412, 
+           December 2014. doi:10.1214/14-AOS1255.
+    .. [3] Arin Chaudhuri and Wenhao Hu. A fast algorithm for 
+           computing distance correlation. Computational Statistics & Data Analysis, 
+           135:15–24, July 2019. doi:10.1016/j.csda.2019.01.016.
+
+    Examples
+    --------
+    >>> from scipy.stats import distance_correlation
+    >>> x = np.arange(100)
+    >>> y = x
+    >>> stat, pvalue = distance_correlation(x, y, workers=-1)
+    >>> '%.1f, %.3f' % (stat, pvalue)
+    '1.0, 0.001'
+    To run an unpaired two-sample test,
+    >>> x = np.arange(100)
+    >>> y = np.arange(79)
+    >>> stat, pvalue = distance_correlation(x, y, random_state=1)
+    >>> '%.3f, %.2f' % (stat, pvalue)
+    '0.033, 0.02'
+    or, if shape of the inputs are the same,
+    >>> x = np.arange(100)
+    >>> y = x
+    >>> stat, pvalue = distance_correlation(x, y, is_twosamp=True)
+    >>> '%.3f, %.1f' % (stat, pvalue)
+    '-0.008, 1.0'
+    """
+    x, y = _check_inputs(x,y, compute_distance=compute_distance, reps=reps,
+                         workers=workers, is_twosamp=is_twosamp, random_state=random_state)
+
+    # calculate Distance_Correlation stat
+    stat = _dcorr(x,y)
+
+    # calculate permutation p-value
+    pvalue, null_dist = _perm_test(x, y, stat, func=_dcorr, reps=reps, workers=workers,
+                                   random_state=random_state)
+    return stat, pvalue
 
 def _threshold_mgc_map(stat_mgc_map, samp_size):
     r"""
