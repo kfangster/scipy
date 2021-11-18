@@ -369,6 +369,55 @@ def _center_distance_matrix(distx, global_corr='mgc', is_ranked=True, bias=False
 
     return cent_distx, rank_distx
 
+#the two split center matrix functions for MGC and Dcorr
+"""
+@cython.wraparound(False)
+@cython.boundscheck(False)
+def _center_distance_matrix(distx, global_corr='mgc', is_ranked=True):
+    cdef int n = distx.shape[0]
+    cdef int m = distx.shape[1]
+    cdef ndarray rank_distx = np.zeros(n * m)
+
+    if is_ranked:
+        rank_distx = _rank_distance_matrix(distx)
+
+    if global_corr == "rank":
+        distx = rank_distx.astype(np.float64, copy=False)
+
+    # 'mgc' distance transform (col-wise mean) - default
+    cdef ndarray exp_distx = np.repeat(((distx.mean(axis=0) * n) / (n-1)), n).reshape(-1, n).T
+
+    # center the distance matrix
+    cdef ndarray cent_distx = distx - exp_distx
+
+    if global_corr != "mantel" and global_corr != "biased":
+        np.fill_diagonal(cent_distx, 0)
+
+    return cent_distx, rank_distx
+
+@cython.wraparound(False)
+@cython.boundscheck(False)
+def _center_distmat(distx, bias):  # pragma: no cover
+    Centers the distance matrices
+    n = distx.shape[0]
+    if bias:
+        # use sum instead of mean because of numba restrictions
+        exp_distx = (
+            np.repeat(distx.sum(axis=0) / n, n).reshape(-1, n).T
+            + np.repeat(distx.sum(axis=1) / n, n).reshape(-1, n)
+            - (distx.sum() / (n * n))
+        )
+    else:
+        exp_distx = (
+            np.repeat((distx.sum(axis=0) / (n - 2)), n).reshape(-1, n).T
+            + np.repeat((distx.sum(axis=1) / (n - 2)), n).reshape(-1, n)
+            - distx.sum() / ((n - 1) * (n - 2))
+        )
+    cent_distx = distx - exp_distx
+    if not bias:
+        np.fill_diagonal(cent_distx, 0)
+    return cent_distx
+"""
 
 
 # Centers each distance matrix and rank matrix
