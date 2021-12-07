@@ -382,23 +382,6 @@ def _transform_distance_matrix(distx, disty, global_corr='mgc', is_ranked=True):
 
     return transform_dist
 
-@cython.wraparound(False)
-@cython.boundscheck(False)
-def _dcorr(distx, disty, bias=False):  # pragma: no cover
-    """
-    Calculate the Dcorr test statistic.
-    """
-    val = "biased" if bias else "unbiased"
-
-    # center distance matrices
-        
-    distx, __ = _center_distance_matrix(distx, global_corr='dcorr', is_ranked=False, bias=bias)
-    disty, __ = _center_distance_matrix(disty, global_corr='dcorr', is_ranked=False, bias=bias)
-
-    stat = np.sum(distx * disty)
-
-    return stat
-
 # MGC specific functions
 @cython.wraparound(False)
 @cython.boundscheck(False)

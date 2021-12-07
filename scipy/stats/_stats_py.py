@@ -45,7 +45,7 @@ from . import _mstats_basic as mstats_basic
 from ._stats_mstats_common import (_find_repeats, linregress, theilslopes,
                                    siegelslopes)
 from ._stats import (_kendall_dis, _toint64, _weightedrankedtau,
-                     _local_correlations, _dcorr)
+                     _local_correlations, _center_distance_matrix)
 from dataclasses import make_dataclass
 from ._hypotests import _all_partitions
 from ._hypotests_pythran import _compute_outer_prob_inside_method
@@ -5157,7 +5157,7 @@ class _ParallelP:
 
 
 def _perm_test(x, y, stat, func, reps=1000, workers=-1, random_state=None):
-    """Helper function that calculates the p-value. See below for uses.
+    r"""Helper function that calculates the p-value. See below for uses.
 
     Parameters
     ----------
@@ -5201,7 +5201,7 @@ def _perm_test(x, y, stat, func, reps=1000, workers=-1, random_state=None):
                      size=4, dtype=np.uint32)) for _ in range(reps)]
 
     # parallelizes with specified workers over number of reps and set seeds
-    parallelp = _ParallelP(x=x, y=y, random_states=random_states,calc_stat=func)
+    parallelp = _ParallelP(x=x, y=y, random_states=random_states, calc_stat=func)
     with MapWrapper(workers) as mapwrapper:
         null_dist = np.array(list(mapwrapper(parallelp, range(reps))))
 
@@ -5565,7 +5565,7 @@ def _mgc_stat(distx, disty):
 def distance_correlation(x, y, compute_distance=_euclidean_dist, reps=1000,
                          workers=1, is_twosamp=False, random_state=None):
     
-    """Dcorr is a measure of dependence between two paired random matrices of not 
+    r"""Dcorr is a measure of dependence between two paired random matrices of not 
     necessarily equal dimensions. The coefficient is 0 if and only if the matrices 
     are independent. It is an example of an energy distance.
 
@@ -5715,6 +5715,32 @@ def distance_correlation(x, y, compute_distance=_euclidean_dist, reps=1000,
     pvalue, null_dist = _perm_test(x, y, stat, func=_dcorr, reps=reps, workers=workers,
                                    random_state=random_state)
     return stat, pvalue
+
+def _dcorr(distx, disty, bias=False):  # pragma: no cover
+    r"""Helper function that calculates the Dcorr stat. See above for use.
+
+    Parameters
+    ----------
+    x, y : ndarray
+        `x` and `y` have shapes `(n, p)` and `(n, q)` or `(n, n)` and `(n, n)`
+        if distance matrices.
+    bias : bool
+        If True returns a biased centered distance matrix.
+        If False returns an unbiased centered distance matrix.
+    Returns
+    -------
+    stat : float
+        The sample MGC test statistic within `[-1, 1]`.
+    """
+    val = "biased" if bias else "unbiased"
+
+    # center distance matrices
+    distx, __ = _center_distance_matrix(distx, global_corr='dcorr', is_ranked=False, bias=bias)
+    disty, __ = _center_distance_matrix(disty, global_corr='dcorr', is_ranked=False, bias=bias)
+
+    stat = np.sum(distx * disty)
+
+    return stat
 
 def _threshold_mgc_map(stat_mgc_map, samp_size):
     r"""
