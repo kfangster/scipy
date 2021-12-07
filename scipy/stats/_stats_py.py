@@ -5148,7 +5148,7 @@ class _ParallelP:
 
         # calculate permuted stats, store in null distribution
         perm_stat = self.calc_stat(self.x, permy)
-        perm_stat = perm_stat[0] if self.calc_stat == _mgc_stat
+        if self.calc_stat == _mgc_stat: perm_stat = perm_stat[0]
 
         return perm_stat
 
@@ -5219,8 +5219,17 @@ def _euclidean_dist(x):
 
 MGCResult = namedtuple('MGCResult', ('stat', 'pvalue', 'mgc_dict'))
 
+
 def _check_inputs(x,y, compute_distance=_euclidean_dist, reps=1000,
                          workers=1, is_twosamp=False, random_state=None):
+    
+    r"""_check_inputs takes all inputs from multiscale_graphcorr and 
+    distance_correlation to check each input for any errors. If there are
+    any errors, the function will raise it and stop the functions from running. 
+    If all inputs are acceptable the check inputs outputs the x and y.
+    
+    """
+    
     if not isinstance(x, np.ndarray) or not isinstance(y, np.ndarray):
         raise ValueError("x and y must be ndarrays")
 
