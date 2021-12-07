@@ -5147,11 +5147,8 @@ class _ParallelP:
         permy = self.y[order][:, order]
 
         # calculate permuted stats, store in null distribution
-        if self.calc_stat == _mgc_stat:
-            perm_stat = self.calc_stat(self.x, permy)[0]
-        # adds a dcorr in here with the self.calc_stat
-        else:
-            perm_stat = self.calc_stat(self.x, permy)
+        perm_stat = self.calc_stat(self.x, permy)
+        perm_stat = perm_stat[0] if self.calc_stat == _mgc_stat
 
         return perm_stat
 
