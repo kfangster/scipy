@@ -388,12 +388,7 @@ def _dcorr(distx, disty, bias=False):  # pragma: no cover
     """
     Calculate the Dcorr test statistic.
     """
- 
-    val = ""
-    if bias:
-        val = "biased"
-    else:
-        val = "unbiased"
+    val = "biased" if bias else "unbiased"
 
     # center distance matrices
         
