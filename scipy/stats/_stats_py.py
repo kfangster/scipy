@@ -45,8 +45,7 @@ from . import _mstats_basic as mstats_basic
 from ._stats_mstats_common import (_find_repeats, linregress, theilslopes,
                                    siegelslopes)
 from ._stats import (_kendall_dis, _toint64, _weightedrankedtau,
-                     _local_correlations)
-from ._stats import (_dcorr)
+                     _local_correlations, _dcorr)
 from dataclasses import make_dataclass
 from ._hypotests import _all_partitions
 from ._hypotests_pythran import _compute_outer_prob_inside_method
