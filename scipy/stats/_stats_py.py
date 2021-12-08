@@ -5637,7 +5637,7 @@ def distance_correlation(x, y, compute_distance=_euclidean_dist, reps=1000,
     
     .. math::
 
-    Dcov^b\sb{n}(x,y) = (1/(n^2)) \ times trace(D^{y} H D^{y} H)
+    Dcov_n^b(x,y) = (1/(n^2)) \ times trace(D^{y} H D^{y} H)
 
     where tr(⋅) is the trace operator and H is defined as \mathbb{1} =I−(1/n)J where I 
     is the identity matrix and J is a matrix of ones. The normalized version 
@@ -5645,7 +5645,7 @@ def distance_correlation(x, y, compute_distance=_euclidean_dist, reps=1000,
     
     .. math::
 
-    Dcorr^b\sb{n}(x,y) = {Dcov^b\sb{n}(x,y)}/{\sqrt{Dcov^b\sb{n}(x,x) Dcov^b\sb{n}(y,y)}}
+    Dcorr_n^b(x,y) = {Dcov_n^b(x,y)}/{\sqrt{Dcov_n^b(x,x) Dcov_n^b(y,y)}}
 
     This is a biased test statistic. An unbiased alternative also exists, 
     and is defined using the following: 
@@ -5654,8 +5654,8 @@ def distance_correlation(x, y, compute_distance=_euclidean_dist, reps=1000,
     
     .. math::
 
-    C^x\sb{ij} = [\(D^x\sb{ij} - (1/(n-2)) \sum_{t=1}^{n} D^x\sb{it} - (1/(n-2)) 
-                  \sum_{s=1}^{n} D^x\sb{sj} + (1/(n-2)(n+2)) \sum_{s,t=1}^{n} D^x\sb{st}] 1\sb{i \neq j}
+    C_{ij}^x = [\(D_{ij}^x - (1/(n-2)) \sum_{t=1}^{n} D_{it}^x - (1/(n-2)) 
+               \sum_{s=1}^{n} D_{sj}^x + (1/(n-2)(n+2)) \sum_{s,t=1}^{n} D_{st}^x] 1_{i \neq j}
     
     and similarly for Cy. 
 
@@ -5663,7 +5663,7 @@ def distance_correlation(x, y, compute_distance=_euclidean_dist, reps=1000,
     
     .. math:: 
     
-    Dcov\sb{n}(x,y)=(1/n(n−3))tr(C^x C^y)
+    Dcov_n(x,y)=(1/n(n−3))tr(C^x C^y)
 
     The p-value returned is calculated using a permutation test using a helper function
     that calculates the parallel p-value.
