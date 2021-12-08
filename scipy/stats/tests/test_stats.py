@@ -7303,7 +7303,6 @@ class TestDcorrStat:
         if dims > 1:
             dims_noise = np.random.normal(0, 1, size=(samps, dims-1))
             x = np.concatenate((x, dims_noise), axis=1)
-
         return x, y
 
     
@@ -7322,7 +7321,6 @@ class TestDcorrStat:
         stat, pvalue= stats.distance_correlation(x, y)
         assert_approx_equal(stat, obs_stat, significant=1)
         assert_approx_equal(pvalue, obs_pvalue, significant=1)
-
     
     @pytest.mark.parametrize("sim_type, obs_stat, obs_pvalue", [
         ("linear", 0.184, 1/1000),           # test linear simulation
@@ -7339,7 +7337,6 @@ class TestDcorrStat:
         assert_approx_equal(stat, obs_stat, significant=1)
         assert_approx_equal(pvalue, obs_pvalue, significant=1)
 
-    
     def test_twosamp(self):
         np.random.seed(12345678)
 
@@ -7360,7 +7357,6 @@ class TestDcorrStat:
         assert_approx_equal(stat, 1.0, significant=1)
         assert_approx_equal(pvalue, 0.001, significant=1)
 
-    
     def test_workers(self):
         np.random.seed(12345678)
 
@@ -7372,7 +7368,6 @@ class TestDcorrStat:
         assert_approx_equal(stat, 0.97, significant=1)
         assert_approx_equal(pvalue, 0.001, significant=1)
 
-   
     def test_random_state(self):
         # generate x and y
         x, y = self._simulations(samps=100, dims=1, sim_type="linear")
@@ -7381,7 +7376,6 @@ class TestDcorrStat:
         stat, pvalue= stats.distance_correlation(x, y, random_state=1)
         assert_approx_equal(stat, 0.97, significant=1)
         assert_approx_equal(pvalue, 0.001, significant=1)
-
    
     def test_dist_perm(self):
         np.random.seed(12345678)
@@ -7390,6 +7384,7 @@ class TestDcorrStat:
         distx = cdist(x, x, metric="euclidean")
         disty = cdist(y, y, metric="euclidean")
 
+        # test stat and pvalue
         stat_dist, pvalue_dist= stats.distance_correlation(distx, disty,
                                                                compute_distance=None,
                                                                random_state=1)
