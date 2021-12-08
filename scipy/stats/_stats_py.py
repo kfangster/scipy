@@ -5690,13 +5690,17 @@ def distance_correlation(x, y, compute_distance=_euclidean_dist, reps=1000,
     >>> stat, pvalue = distance_correlation(x, y, workers=-1)
     >>> '%.1f, %.3f' % (stat, pvalue)
     '1.0, 0.001'
+
     To run an unpaired two-sample test,
+
     >>> x = np.arange(100)
     >>> y = np.arange(79)
     >>> stat, pvalue = distance_correlation(x, y, random_state=1)
     >>> '%.3f, %.2f' % (stat, pvalue)
     '0.033, 0.02'
+
     or, if shape of the inputs are the same,
+    
     >>> x = np.arange(100)
     >>> y = x
     >>> stat, pvalue = distance_correlation(x, y, is_twosamp=True)
