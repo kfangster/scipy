@@ -5133,9 +5133,7 @@ def weightedtau(x, y, rank=True, weigher=None, additive=True):
 
 
 class _ParallelP:
-    """
-    Helper function to calculate parallel p-value.
-    """
+    r"""Helper function to calculate parallel p-value."""
     def __init__(self, x, y, random_states,calc_stat):
         self.x = x
         self.y = y
