@@ -5744,7 +5744,18 @@ def _dcorr(distx, disty, bias=False):  # pragma: no cover
     distx, __ = _center_distance_matrix(distx, global_corr='dcorr', is_ranked=False, bias=bias)
     disty, __ = _center_distance_matrix(disty, global_corr='dcorr', is_ranked=False, bias=bias)
 
-    stat = np.sum(distx * disty)
+    # calculate covariances and variances
+    covar = np.sum(distx * disty)
+    varx = np.sum(distx * distx)
+    vary = np.sum(disty * disty)
+
+    # stat is 0 with negative variances (would make denominator undefined)
+    if varx <= 0 or vary <= 0:
+        stat = 0
+
+    # calculate generalized test statistic
+    else:
+        stat = covar / np.real(np.sqrt(varx * vary))
 
     return stat
 
