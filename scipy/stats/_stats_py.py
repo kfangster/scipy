@@ -5571,20 +5571,21 @@ def _mgc_stat(distx, disty):
 def distance_correlation(x, y, compute_distance=_euclidean_dist, reps=1000,
                          workers=1, is_twosamp=False, random_state=None):
     
-    r"""Dcorr is a measure of dependence between two paired random matrices of not 
-    necessarily equal dimensions. The coefficient is 0 if and only if the matrices 
-    are independent. It is an example of an energy distance.
+    r"""Distance Correlation (Dcorr) is a measure of dependence between two 
+    paired random matrices of not necessarily equal dimensions. The coefficient 
+    is 0 if and only if the matrices are independent. It is an example of an 
+    energy distance.
 
     Parameters
     ----------
     x, y : ndarray
         If ``x`` and ``y`` have shapes ``(n, p)`` and ``(n, q)`` where `n` is
         the number of samples and `p` and `q` are the number of dimensions,
-        then the MGC independence test will be run.  Alternatively, ``x`` and
+        then the Dcorr independence test will be run.  Alternatively, ``x`` and
         ``y`` can have shapes ``(n, n)`` if they are distance or similarity
         matrices, and ``compute_distance`` must be sent to ``None``. If ``x``
         and ``y`` have shapes ``(n, p)`` and ``(m, p)``, an unpaired
-        two-sample MGC test will be run.
+        two-sample Dcorr test will be run.
     compute_distance : callable, optional
         A function that computes the distance or similarity among the samples
         within each data matrix. Set to ``None`` if ``x`` and ``y`` are
@@ -5627,68 +5628,59 @@ def distance_correlation(x, y, compute_distance=_euclidean_dist, reps=1000,
     pvalue : float
         The p-value obtained via permutation.
 
-    
     Notes
     -----
+    A description of the process of Dcorr and applications on data
+    can be found in [2]. It is performed using the following steps:
 
-    #. Let x and y be (n,p) samples of random variables X and Y. Let D^x be the n×n 
-       distance matrix of x and D^y be the n×n be the distance matrix of y. 
-       The distance covariance is
+    Let x and y be (n,p) samples of random variables X and Y. Let D^x be the n×n 
+    distance matrix of x and D^y be the n×n be the distance matrix of y. 
+    The distance covariance is
     
     .. math::
 
-    Dcovnb(x,y) = (1/(n^2)) \ times trace(D^{y} H D^{y} H)
+    Dcov^b\sb{n}(x,y) = (1/(n^2)) \ times trace(D^{y} H D^{y} H)
 
-    #. where tr(⋅) is the trace operator and H is defined as H=I−(1/n)J where I 
-       is the identity matrix and J is a matrix of ones. The normalized version 
-       of this covariance is distance correlation 1 and is
+    where tr(⋅) is the trace operator and H is defined as \mathbb{1} =I−(1/n)J where I 
+    is the identity matrix and J is a matrix of ones. The normalized version 
+    of this covariance is distance correlation 1 and is
     
     .. math::
 
-    Dcorrnb(x,y) = {Dcovnb(x,y)}/{\sqrt{Dcovnb(x,x) Dcovnb(y,y)}}
+    Dcorr^b\sb{n}(x,y) = {Dcov^b\sb{n}(x,y)}/{\sqrt{Dcov^b\sb{n}(x,x) Dcov^b\sb{n}(y,y)}}
 
-    #. This is a biased test statistic. An unbiased alternative also exists, 
-       and is defined using the following: 
+    This is a biased test statistic. An unbiased alternative also exists, 
+    and is defined using the following: 
 
-    #. Consider the centering process where 1(⋅) is the indicator function:
+    Consider the centering process where \mathbb{1(\cdot)} is the indicator function:
     
     .. math::
 
-    Cij^x = [\(Dsb^x - (1/(n-2)) \sum_{t=1}^{n} Dit^x - (1/(n-2)) \sum_{s=1}^{n} Dsj^x 
-             + (1/(n-2)(n+2)) \sum_{s,t=1}^{n} Dst^x]1\sb{i≠j}
+    C^x\sb{ij} = [\(D^x\sb{ij} - (1/(n-2)) \sum_{t=1}^{n} D^x\sb{it} - (1/(n-2)) 
+                  \sum_{s=1}^{n} D^x\sb{sj} + (1/(n-2)(n+2)) \sum_{s,t=1}^{n} D^x\sb{st}] 1\sb{i \neq j}
     
-    #. and similarly for Cy. 
+    and similarly for Cy. 
 
-    #. Then, this unbiased Dcorr is:
+    Then, the unbiased Dcorr is:
     
     .. math:: 
     
-    Dcovn(x,y)=(1n/(n−3))tr(CxCy)
+    Dcov\sb{n}(x,y)=(1/n(n−3))tr(C^x C^y)
 
-    #. The normalized version of this covariance 2 is:
+    The p-value returned is calculated using a permutation test using a helper function
+    that calculates the parallel p-value.
 
-    .. math::
+    Dcorr's stat and p-value is equivalent to the values in similar testing methods
+    such as Energy and hSIC [1,2]. 
 
-    Dcorrn(x,y)={Dcovn(x,y)}/{\sqrt{Dcovn(x,x) Dcovn(y,y)}}
-
-    #. The p-value returned is calculated using a permutation test using 
-       hyppo.tools.perm_test. The fast version of the test uses hyppo.tools.chi2_approx.
-
-    #. When the data is 1 dimension and the distance metric is Euclidean, 
-       and even faster version of the algorithm is run (computational complexity is O(nlogn))^3.
-    
     References
     ----------
-    .. [1] Gábor J. Székely, Maria L. Rizzo, and Nail K. Bakirov. 
-           Measuring and testing dependence by correlation of distances. 
-           The Annals of Statistics, 35(6):2769–2794, December 2007. 
-           doi:10.1214/009053607000000505.
-    .. [2] Gábor J. Székely and Maria L. Rizzo. Partial distance correlation 
-           with methods for dissimilarities. The Annals of Statistics, 42(6):2382–2412, 
-           December 2014. doi:10.1214/14-AOS1255.
-    .. [3] Arin Chaudhuri and Wenhao Hu. A fast algorithm for 
-           computing distance correlation. Computational Statistics & Data Analysis, 
-           135:15–24, July 2019. doi:10.1016/j.csda.2019.01.016.
+    .. [1] Panda, S., Cencheng, S., Perry, R., Zorn, J., Lutz, A.
+           Priebe, C., Vogelstein, J. T. (2019). Nonpar MANOVA via Independence
+           Testing. Package. : arXiv: `1910.08883`
+    .. [2] Cencheng, S., Vogelstein, J. T. (2019). The Exact Equivalence of
+           Distance and Kernel Methods for Hypothesis Testing. 
+           Package. : arXiv: `1806.05514`
 
     Examples
     --------
