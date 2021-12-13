@@ -5223,8 +5223,8 @@ MGCResult = namedtuple('MGCResult', ('stat', 'pvalue', 'mgc_dict'))
 def _check_inputs(x,y, compute_distance=_euclidean_dist, reps=1000,
                          workers=1, is_twosamp=False, random_state=None):
     r"""
-    _check_inputs takes all inputs from multiscale_graphcorr and 
-    distance_correlation to check each input for any errors. If there are any 
+    ``_check_inputs`` takes all inputs from ``multiscale_graphcorr`` and 
+    ``distance_correlation`` to check each input for any errors. If there are any 
     errors, the function will raise it and stop the functions from running. 
     If all inputs are acceptable the check inputs outputs the x and y.
     
@@ -5233,11 +5233,11 @@ def _check_inputs(x,y, compute_distance=_euclidean_dist, reps=1000,
     x, y : ndarray
         If ``x`` and ``y`` have shapes ``(n, p)`` and ``(n, q)`` where `n` is
         the number of samples and `p` and `q` are the number of dimensions,
-        then the MGC and Dcorr independence test will be run.  Alternatively, ``x`` and
+        then the MGC or Dcorr independence test will be run.  Alternatively, ``x`` and
         ``y`` can have shapes ``(n, n)`` if they are distance or similarity
         matrices, and ``compute_distance`` must be sent to ``None``. If ``x``
         and ``y`` have shapes ``(n, p)`` and ``(m, p)``, an unpaired
-        two-sample MGC and Dcorr test will be run.
+        two-sample MGC or Dcorr test will be run.
     compute_distance : callable, optional
         A function that computes the distance or similarity among the samples
         within each data matrix. Set to ``None`` if ``x`` and ``y`` are
