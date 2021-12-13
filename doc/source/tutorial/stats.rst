@@ -1310,7 +1310,7 @@ Now, we can see the test statistic and p-value:
     >>> print("P-value: ", round(pvalue, 1))
     P-value:  0.9 #random 
     
-This section here is the null case. It is clear from here, that Dcorr is able to determine a relationship between the
+This section here is the null case. It is clear from here, that Dcorr is not able to determine a relationship between the
 input data matrices because the p-value is very high and the Dcorr test statistic
 is relatively low. This makes sense as the data is independent. 
 
