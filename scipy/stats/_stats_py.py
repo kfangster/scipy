@@ -5222,10 +5222,10 @@ MGCResult = namedtuple('MGCResult', ('stat', 'pvalue', 'mgc_dict'))
 
 def _check_inputs(x,y, compute_distance=_euclidean_dist, reps=1000,
                          workers=1, is_twosamp=False, random_state=None):
-    r"""_check_inputs takes all inputs from multiscale_graphcorr and 
-    distance_correlation to check each input for any errors. 
-    
-    If there are any errors, the function will raise it and stop the functions from running. 
+    r"""
+    _check_inputs takes all inputs from multiscale_graphcorr and 
+    distance_correlation to check each input for any errors. If there are any 
+    errors, the function will raise it and stop the functions from running. 
     If all inputs are acceptable the check inputs outputs the x and y.
     
     Parameters
@@ -5815,7 +5815,8 @@ def distance_correlation(x, y, compute_distance=_euclidean_dist, reps=1000,
     return stat, pvalue, dcorr_dict
 
 def _dcorr(distx, disty, bias=False):  # pragma: no cover
-    r"""Helper function that calculates the Dcorr stat. See above for use.
+    r"""
+    Helper function that calculates the Dcorr stat. See above for use.
 
     Parameters
     ----------
@@ -5825,6 +5826,7 @@ def _dcorr(distx, disty, bias=False):  # pragma: no cover
     bias : bool
         If True returns a biased centered distance matrix.
         If False returns an unbiased centered distance matrix.
+    
     Returns
     -------
     stat : float
