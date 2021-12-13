@@ -361,10 +361,6 @@ def _center_distance_matrix(distx, global_corr='mgc', is_ranked=True, bias=False
     if global_corr == "dcorr" and not bias:
         np.fill_diagonal(cent_distx, 0)
 
-
-    if global_corr != "mantel" and global_corr != "biased":
-        np.fill_diagonal(cent_distx, 0)
-
     return cent_distx, rank_distx
 
 # Centers each distance matrix and rank matrix
