@@ -5566,7 +5566,7 @@ def multiscale_graphcorr(x, y, compute_distance=_euclidean_dist, reps=1000,
     opt_scale = stat_dict["opt_scale"]
 
     # calculate permutation MGC p-value
-    pvalue, null_dist = _perm_test(x, y, stat, func=_mgc_stat, reps=reps, workers=workers,
+    pvalue, null_dist = _perm_test(x, y, stat, calc_stat=_mgc_stat, reps=reps, workers=workers,
                                    random_state=random_state)
 
     # save all stats (other than stat/p-value) in dictionary
@@ -5772,7 +5772,7 @@ def distance_correlation(x, y, compute_distance=_euclidean_dist, reps=1000,
     stat = _dcorr(x,y)
 
     # calculate permutation p-value
-    pvalue, null_dist = _perm_test(x, y, stat, func=_dcorr, reps=reps, workers=workers,
+    pvalue, null_dist = _perm_test(x, y, stat, calc_stat=_dcorr, reps=reps, workers=workers,
                                    random_state=random_state)
     
     # save all stats (other than stat/p-value) in dictionary
