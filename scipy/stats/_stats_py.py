@@ -5222,10 +5222,10 @@ MGCResult = namedtuple('MGCResult', ('stat', 'pvalue', 'mgc_dict'))
 
 def _check_inputs(x,y, compute_distance=_euclidean_dist, reps=1000,
                          workers=1, is_twosamp=False, random_state=None):
-    
     r"""_check_inputs takes all inputs from multiscale_graphcorr and 
-    distance_correlation to check each input for any errors. If there are
-    any errors, the function will raise it and stop the functions from running. 
+    distance_correlation to check each input for any errors. 
+    
+    If there are any errors, the function will raise it and stop the functions from running. 
     If all inputs are acceptable the check inputs outputs the x and y.
     
     Parameters
@@ -5385,6 +5385,7 @@ def _check_inputs(x,y, compute_distance=_euclidean_dist, reps=1000,
         x = compute_distance(x)
         y = compute_distance(y)
     return x, y
+
 
 def multiscale_graphcorr(x, y, compute_distance=_euclidean_dist, reps=1000,
                          workers=1, is_twosamp=False, random_state=None):
@@ -5657,10 +5658,13 @@ def _mgc_stat(distx, disty):
 
     return stat, stat_dict
 
+
 def distance_correlation(x, y, compute_distance=_euclidean_dist, reps=1000,
                          workers=1, is_twosamp=False, random_state=None):
     
-    r"""Distance Correlation (Dcorr) is a measure of dependence between two 
+    r"""Computes the Distance Correlation (Dcorr) test statistic and p-value.
+    
+    Distance Correlation (Dcorr) is a measure of dependence between two 
     paired random matrices of not necessarily equal dimensions. The coefficient 
     is 0 if and only if the matrices are independent. It is an example of an 
     energy distance.
