@@ -5724,47 +5724,47 @@ def distance_correlation(x, y, compute_distance=_euclidean_dist, reps=1000,
     Notes
     -----
     A description of the process of Dcorr and applications on data
-    can be found in [2]. It is performed using the following steps:
+    can be found in [2]_. It is performed using the following steps:
 
-    Let x and y be (n,p) samples of random variables X and Y. Let D^x be the n×n 
-    distance matrix of x and D^y be the n×n be the distance matrix of y. 
-    The distance covariance is
+    Let :math:`x` and :math:`y` be :math:`(n,p)` samples of random variables :math:`X` and :math:`Y`. 
+    Let :math:`D^x` be the :math:`n \times n` distance matrix of :math:`x` and :math:`D^y` be the :math:`n \times n` be the 
+    distance matrix of :math:`y`. The distance covariance is
     
     .. math::
 
-    Dcov_n^b(x,y) = (1/(n^2)) \ times trace(D^{y} H D^{y} H)
+        Dcov_n^b(x,y) = (1/(n^2)) \ times \mathrm{tr(D^{y} H D^{y} H)}
 
-    where tr(⋅) is the trace operator and H is defined as \mathbb{1} =I−(1/n)J where I 
-    is the identity matrix and J is a matrix of ones. The normalized version 
+    where math`\mathrm{tr} (\cdot)` is the trace operator and :math:`H` is defined as \mathbb{1} =I−(1/n)J where :math:`I` 
+    is the identity matrix and :math:`J` is a matrix of ones. The normalized version 
     of this covariance is distance correlation 1 and is
     
     .. math::
 
-    Dcorr_n^b(x,y) = {Dcov_n^b(x,y)}/{\sqrt{Dcov_n^b(x,x) Dcov_n^b(y,y)}}
+        Dcorr_n^b(x,y) = {Dcov_n^b(x,y)}/{\sqrt{Dcov_n^b(x,x) Dcov_n^b(y,y)}}
 
     This is a biased test statistic. An unbiased alternative also exists, 
     and is defined using the following: 
 
-    Consider the centering process where \mathbb{1(\cdot)} is the indicator function:
+    Consider the centering process where \mathbb{1} is the indicator function:
     
     .. math::
 
-    C_{ij}^x = [\(D_{ij}^x - (1/(n-2)) \sum_{t=1}^{n} D_{it}^x - (1/(n-2)) 
-               \sum_{s=1}^{n} D_{sj}^x + (1/(n-2)(n+2)) \sum_{s,t=1}^{n} D_{st}^x] 1_{i \neq j}
+        C_{ij}^x = [\(D_{ij}^x - (1/(n-2)) \sum_{t=1}^{n} D_{it}^x - (1/(n-2)) 
+                \sum_{s=1}^{n} D_{sj}^x + (\frac{1}{(n-2)(n+2)}) \sum_{s,t=1}^{n} D_{st}^x] 1_{i \neq j}
     
-    and similarly for Cy. 
+    and similarly for :math:`C^y`. 
 
     Then, the unbiased Dcorr is:
     
     .. math:: 
-    
-    Dcov_n(x,y)=(1/n(n−3))tr(C^x C^y)
+        
+        Dcov_n(x,y)=(1/n(n−3))\mathrm{tr(C^x C^y)}
 
     The p-value returned is calculated using a permutation test using a helper function
     that calculates the parallel p-value.
 
     Dcorr's stat and p-value is equivalent to the values in similar testing methods
-    such as Energy and hSIC [1,2]. 
+    such as Energy and hSIC [1]_ [2]_. 
 
     References
     ----------
@@ -5809,7 +5809,10 @@ def distance_correlation(x, y, compute_distance=_euclidean_dist, reps=1000,
     # calculate permutation p-value
     pvalue, null_dist = _perm_test(x, y, stat, func=_dcorr, reps=reps, workers=workers,
                                    random_state=random_state)
-    return stat, pvalue
+    
+    # save all stats (other than stat/p-value) in dictionary
+    dcorr_dict = {"null_dist": null_dist}
+    return stat, pvalue, dcorr_dict
 
 def _dcorr(distx, disty, bias=False):  # pragma: no cover
     r"""Helper function that calculates the Dcorr stat. See above for use.
