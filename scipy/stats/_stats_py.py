@@ -5661,7 +5661,6 @@ def _mgc_stat(distx, disty):
 
 def distance_correlation(x, y, compute_distance=_euclidean_dist, reps=1000,
                          workers=1, is_twosamp=False, random_state=None):
-    
     r"""Computes the Distance Correlation (Dcorr) test statistic and p-value.
     
     Distance Correlation (Dcorr) is a measure of dependence between two 
@@ -5813,6 +5812,7 @@ def distance_correlation(x, y, compute_distance=_euclidean_dist, reps=1000,
     # save all stats (other than stat/p-value) in dictionary
     dcorr_dict = {"null_dist": null_dist}
     return stat, pvalue, dcorr_dict
+
 
 def _dcorr(distx, disty, bias=False):  # pragma: no cover
     r"""
