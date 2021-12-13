@@ -5754,7 +5754,7 @@ def distance_correlation(x, y, compute_distance=_euclidean_dist, reps=1000,
     
     and similarly for :math:`C^y`. 
 
-    Then, the unbiased Dcorr is:
+    Then, the unbiased Dcorr test statistic is:
     
     .. math:: 
         
